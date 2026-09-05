@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  avatarUrl   String?
+  lastSeenAt  DateTime     @default(now())
+  memberships Membership[]
+  messages    Message[]
+}
+
+model Conversation {
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+  lastMessageAt DateTime     @default(now())
+  members       Membership[]
+  messages      Message[]
+
+  // Serves GET /api/conversations: list the caller's conversations ordered
+  // by most-recent activity without a sort on the fetched rows.
+  @@index([lastMessageAt(sort: Desc)])
+}
+
+model Membership {
+  id                String    @id @default(cuid())
+  userId            String
+  conversationId    String
+  lastReadMessageId String?
+  lastReadAt        DateTime?
+  joinedAt          DateTime  @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  // Membership lookup ("am I in this conversation") and prevents double-join.
+  @@unique([userId, conversationId])
+  // "Who is in this conversation" — fanout room membership, unread joins.
+  @@index([conversationId])
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  GIF
+  STICKER
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  senderId       String
+  clientMsgId    String
+  type           MessageType
+  body           String?
+  mediaKey       String? // R2 object key; never a public URL
+  width          Int?
+  height         Int?
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  // Idempotent upsert target: retries/reconnect replay/duplicate tabs all
+  // converge on one row (CLAUDE.md §5).
+  @@unique([conversationId, clientMsgId])
+  // Keyset pagination: WHERE conversationId = ? ORDER BY createdAt DESC, id DESC.
+  @@index([conversationId, createdAt(sort: Desc), id(sort: Desc)])
+}

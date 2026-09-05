@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Near-monochrome palette, one accent reserved for own-message bubbles and
+   read receipts only (CLAUDE.md §8) — everything else stays grayscale. */
+:root {
+  --background: #ffffff;
+  --foreground: #18181b;
+  --surface: #f4f4f5;
+  --border: #e4e4e7;
+  --muted: #71717a;
+  --muted-2: #a1a1aa;
+  --accent: #3355ff;
+  --accent-contrast: #ffffff;
+  /* Light tint for own-message bubbles — keeps the accent visible without
+     turning the whole bubble into a saturated block, and leaves the tick
+     itself as the one moment of full-strength accent (read state). */
+  --accent-soft: color-mix(in srgb, var(--accent) 13%, white);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #f4f4f5;
+    --surface: #18181b;
+    --border: #27272a;
+    --muted: #a1a1aa;
+    --muted-2: #71717a;
+    --accent: #5b7fff;
+    --accent-contrast: #ffffff;
+    --accent-soft: color-mix(in srgb, var(--accent) 22%, black);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

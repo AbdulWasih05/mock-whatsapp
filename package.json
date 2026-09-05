@@ -1,0 +1,24 @@
+{
+  "name": "whatsapp-mock",
+  "private": true,
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @wamock/web dev",
+    "dev:ws": "pnpm --filter @wamock/ws dev",
+    "build": "pnpm --filter @wamock/shared build && pnpm -r --filter=!@wamock/shared build",
+    "db:migrate": "pnpm --filter @wamock/web prisma migrate dev",
+    "db:deploy": "pnpm --filter @wamock/web db:migrate:deploy",
+    "db:seed": "pnpm --filter @wamock/web db:seed",
+    "db:studio": "pnpm --filter @wamock/web prisma studio",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "prettier": "^3.3.3"
+  }
+}
