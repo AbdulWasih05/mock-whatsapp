@@ -15,6 +15,12 @@ const httpServer = createServer((req, res) => {
     handleFanout(req, res);
     return;
   }
+  // Render's health check and the keep-warm pinger hit this; a free
+  // instance that stops receiving requests spins down (see README).
+  if (req.method === "GET" && req.url === "/healthz") {
+    res.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify({ ok: true }));
+    return;
+  }
   res.writeHead(404).end();
 });
 

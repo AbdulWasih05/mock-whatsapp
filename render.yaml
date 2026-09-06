@@ -1,0 +1,27 @@
+# Render Blueprint — the Socket.IO fanout service only.
+# The Next.js app deploys to Vercel; Postgres is Neon. See README "Deployment".
+services:
+  - type: web
+    name: wamock-ws
+    runtime: node
+    plan: free
+    region: oregon
+    branch: master
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @wamock/shared build && pnpm --filter @wamock/ws build
+    startCommand: node apps/ws/dist/index.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22.11.0"
+      # Must match the Vercel deployment byte for byte: the same secret signs
+      # the session JWT the socket handshake verifies.
+      - key: AUTH_SECRET
+        sync: false
+      # Shared secret on POST /internal/fanout — the only way a message
+      # reaches a socket room.
+      - key: WS_INTERNAL_SECRET
+        sync: false
+      # Socket.IO CORS allowlist. Exact Vercel production origin, no slash.
+      - key: WEB_ORIGIN
+        sync: false

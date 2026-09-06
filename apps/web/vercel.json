@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @wamock/shared build && prisma generate && next build",
+  "installCommand": "pnpm install --frozen-lockfile --prod=false",
+  "framework": "nextjs"
+}
